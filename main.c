@@ -6,13 +6,16 @@
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
-#define RECT_WIDTH 20
-#define RECT_HEIGHT 100
+#define PADDLE_WIDTH 20
+#define PADDLE_HEIGHT 100
 
 #define LINE_WIDTH 10
 #define LINE_HEIGHT 50
 
-#define RECT_SPEED 25
+#define BALL_SIDE 25
+#define BALL_INIT_SPEED 15
+
+#define PADDLE_SPEED 25
 
 struct {
     bool j_pressed;
@@ -20,6 +23,11 @@ struct {
     bool up_pressed;
     bool down_pressed;
 } key_status;
+
+struct {
+    int speed_x;
+    int speed_y;
+} ball_stat;
 
 struct {
     SDL_Window *window;
@@ -35,7 +43,10 @@ int init_window();
 void objects_setup();
 void render_frame();
 int handle_input(SDL_Event *event);
+void move_ball();
+void computer_move();
 void detect_keys(SDL_Scancode scancode, bool pressed);
+bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
 
 int main(int argc, char *argv[]) {
     SDL_Event event;
@@ -53,16 +64,17 @@ int main(int argc, char *argv[]) {
 
         if ((key_status.k_pressed || key_status.up_pressed) &&
             display.player_paddle.y > 0) {
-            display.player_paddle.y -= RECT_SPEED;
-            display.computer_paddle.y -= RECT_SPEED;
+            display.player_paddle.y -= PADDLE_SPEED;
+            display.computer_paddle.y -= PADDLE_SPEED;
         }
 
         else if ((key_status.j_pressed || key_status.down_pressed) &&
-                 display.player_paddle.y + RECT_HEIGHT < WINDOW_HEIGHT) {
-            display.player_paddle.y += RECT_SPEED;
-            display.computer_paddle.y += RECT_SPEED;
+                 display.player_paddle.y + PADDLE_HEIGHT < WINDOW_HEIGHT) {
+            display.player_paddle.y += PADDLE_SPEED;
+            display.computer_paddle.y += PADDLE_SPEED;
         }
 
+        move_ball();
         render_frame();
     }
 }
@@ -127,6 +139,9 @@ void render_frame() {
     SDL_RenderFillRect(display.renderer, &display.player_paddle);
     SDL_RenderFillRect(display.renderer, &display.computer_paddle);
 
+    // Render ball
+    SDL_RenderFillRect(display.renderer, &display.ball);
+
     // Render center line
     for (int i = 0; i < WINDOW_HEIGHT; i += LINE_HEIGHT * 1.5) {
         display.line.y = i;
@@ -167,17 +182,47 @@ int init_window() {
 }
 
 void objects_setup() {
-    display.player_paddle.w = RECT_WIDTH;
-    display.player_paddle.h = RECT_HEIGHT;
+    display.player_paddle.w = PADDLE_WIDTH;
+    display.player_paddle.h = PADDLE_HEIGHT;
     display.player_paddle.x = WINDOW_WIDTH - 70;
-    display.player_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+    display.player_paddle.y = WINDOW_HEIGHT / 2 - PADDLE_HEIGHT / 2;
 
-    display.computer_paddle.w = RECT_WIDTH;
-    display.computer_paddle.h = RECT_HEIGHT;
-    display.computer_paddle.x = 70 - RECT_WIDTH;
-    display.computer_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+    display.computer_paddle.w = PADDLE_WIDTH;
+    display.computer_paddle.h = PADDLE_HEIGHT;
+    display.computer_paddle.x = 70 - PADDLE_WIDTH;
+    display.computer_paddle.y = WINDOW_HEIGHT / 2 - PADDLE_HEIGHT / 2;
 
     display.line.w = LINE_WIDTH;
     display.line.h = LINE_HEIGHT;
     display.line.x = WINDOW_WIDTH / 2 - LINE_WIDTH / 2;
+
+    display.ball.w = BALL_SIDE;
+    display.ball.h = BALL_SIDE;
+
+    display.ball.x = WINDOW_WIDTH / 2 - BALL_SIDE / 2;
+    display.ball.y = WINDOW_HEIGHT / 2;
+
+    ball_stat.speed_x = BALL_INIT_SPEED;
+    ball_stat.speed_y = 0;
+}
+
+bool is_colliding(SDL_Rect paddle, SDL_Rect ball) {
+    return (ball.y >= paddle.y - ball.h) && (ball.y <= paddle.y + paddle.h) &&
+           (((ball.x <= paddle.x + paddle.w) &&
+             (ball.x + ball.w >= paddle.x)) ||
+            ((paddle.x <= ball.x + ball.w) && (ball.x <= paddle.x)));
+}
+
+void move_ball() {
+    if (is_colliding(display.ball, display.player_paddle) ||
+        is_colliding(display.ball, display.computer_paddle)) {
+        ball_stat.speed_x *= -1;
+    }
+
+    display.ball.x += ball_stat.speed_x;
+    display.ball.y += ball_stat.speed_y;
+}
+
+void computer_move() {
+
 }
