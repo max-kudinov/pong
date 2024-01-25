@@ -45,6 +45,7 @@ void render_frame();
 int handle_input(SDL_Event *event);
 void move_ball();
 void computer_move();
+void human_move();
 void detect_keys(SDL_Scancode scancode, bool pressed);
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
 
@@ -62,18 +63,8 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        if ((key_status.k_pressed || key_status.up_pressed) &&
-            display.player_paddle.y > 0) {
-            display.player_paddle.y -= PADDLE_SPEED;
-            display.computer_paddle.y -= PADDLE_SPEED;
-        }
 
-        else if ((key_status.j_pressed || key_status.down_pressed) &&
-                 display.player_paddle.y + PADDLE_HEIGHT < WINDOW_HEIGHT) {
-            display.player_paddle.y += PADDLE_SPEED;
-            display.computer_paddle.y += PADDLE_SPEED;
-        }
-
+        human_move();
         move_ball();
         render_frame();
     }
@@ -225,4 +216,18 @@ void move_ball() {
 
 void computer_move() {
 
+}
+
+void human_move() {
+    if ((key_status.k_pressed || key_status.up_pressed) &&
+        display.player_paddle.y > 0) {
+        display.player_paddle.y -= PADDLE_SPEED;
+        display.computer_paddle.y -= PADDLE_SPEED;
+    }
+
+    else if ((key_status.j_pressed || key_status.down_pressed) &&
+             display.player_paddle.y + PADDLE_HEIGHT < WINDOW_HEIGHT) {
+        display.player_paddle.y += PADDLE_SPEED;
+        display.computer_paddle.y += PADDLE_SPEED;
+    }
 }
