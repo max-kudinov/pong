@@ -9,6 +9,9 @@
 #define RECT_WIDTH 20
 #define RECT_HEIGHT 100
 
+#define LINE_WIDTH 10
+#define LINE_HEIGHT 50
+
 #define RECT_SPEED 25
 
 typedef struct {
@@ -22,8 +25,9 @@ struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
-    SDL_Rect player_rect;
-    SDL_Rect computer_rect;
+    SDL_Rect player_paddle;
+    SDL_Rect computer_paddle;
+    SDL_Rect line;
     key_status keys;
 } state;
 
@@ -68,11 +72,19 @@ int main(int argc, char *argv[]) {
                     WINDOW_HEIGHT
                 );
 
-    state.player_rect.w = 20;
-    state.player_rect.h = 100;
+    state.player_paddle.w = RECT_WIDTH;
+    state.player_paddle.h = RECT_HEIGHT;
+    state.player_paddle.x = WINDOW_WIDTH - 70;
+    state.player_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
 
-    state.player_rect.x = WINDOW_WIDTH - 70;
-    state.player_rect.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+    state.computer_paddle.w = RECT_WIDTH;
+    state.computer_paddle.h = RECT_HEIGHT;
+    state.computer_paddle.x = 70 - RECT_WIDTH;
+    state.computer_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+
+    state.line.w = LINE_WIDTH;
+    state.line.h = LINE_HEIGHT;
+    state.line.x = WINDOW_WIDTH / 2 - LINE_WIDTH / 2;
 
     SDL_Event event;
 
@@ -82,13 +94,15 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        if ((state.keys.k_pressed || state.keys.up_pressed) && state.player_rect.y > 0) {
-            state.player_rect.y -= RECT_SPEED;
+        if ((state.keys.k_pressed || state.keys.up_pressed) && state.player_paddle.y > 0) {
+            state.player_paddle.y -= RECT_SPEED;
+            state.computer_paddle.y -= RECT_SPEED;
         }
 
         else if ((state.keys.j_pressed || state.keys.down_pressed) &&
-                  state.player_rect.y + RECT_HEIGHT < WINDOW_HEIGHT) {
-            state.player_rect.y += RECT_SPEED;
+                  state.player_paddle.y + RECT_HEIGHT < WINDOW_HEIGHT) {
+            state.player_paddle.y += RECT_SPEED;
+            state.computer_paddle.y += RECT_SPEED;
         }
 
         render_frame();
@@ -145,11 +159,21 @@ int handle_input(SDL_Event *event) {
 }
 
 void render_frame() {
+    // Render background
     SDL_SetRenderTarget(state.renderer, state.texture);
     SDL_SetRenderDrawColor(state.renderer, 0, 0, 0, 0);
     SDL_RenderClear(state.renderer);
-    SDL_RenderDrawRect(state.renderer, &state.player_rect);
+
+    // Render paddles
     SDL_SetRenderDrawColor(state.renderer, 255, 255, 255, 0);
-    SDL_RenderFillRect(state.renderer, &state.player_rect);
+    SDL_RenderFillRect(state.renderer, &state.player_paddle);
+    SDL_RenderFillRect(state.renderer, &state.computer_paddle);
+
+    // Render center line
+    for (int i = 0; i < WINDOW_HEIGHT; i += LINE_HEIGHT * 1.5) {
+        state.line.y = i;
+        SDL_RenderFillRect(state.renderer, &state.line);
+    }
+
     SDL_RenderPresent(state.renderer);
 }
