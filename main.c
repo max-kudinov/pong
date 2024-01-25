@@ -11,8 +11,6 @@
 
 #define RECT_SPEED 25
 
-#define GAP 0
-
 typedef struct {
     bool j_pressed;
     bool k_pressed;
@@ -31,7 +29,7 @@ struct {
 
 void detect_keys(SDL_Scancode scancode, bool pressed);
 int handle_input(SDL_Event *event);
-void render();
+void render_frame();
 
 int main(int argc, char *argv[]) {
     // Init SDL2
@@ -92,7 +90,8 @@ int main(int argc, char *argv[]) {
                   state.player_rect.y + RECT_HEIGHT < WINDOW_HEIGHT) {
             state.player_rect.y += RECT_SPEED;
         }
-        render();
+
+        render_frame();
     }
 }
 
@@ -145,7 +144,7 @@ int handle_input(SDL_Event *event) {
     return 0;
 }
 
-void render() {
+void render_frame() {
     SDL_SetRenderTarget(state.renderer, state.texture);
     SDL_SetRenderDrawColor(state.renderer, 0, 0, 0, 0);
     SDL_RenderClear(state.renderer);
