@@ -1,12 +1,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <stdio.h>
-// #include <stdint.h>
+#include <stdbool.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
-#define GAP 30
+#define GAP 10
 
 int main(int argc, char *argv[]) {
 
@@ -14,6 +14,16 @@ int main(int argc, char *argv[]) {
     SDL_Renderer *renderer;
     SDL_Texture *texture;
     SDL_Rect rect;
+
+    typedef struct {
+        bool h_pressed;
+        bool j_pressed;
+        bool k_pressed;
+        bool l_pressed;
+    }
+    keys;
+
+    keys kb;
 
     // Init SDL2
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -36,15 +46,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(
+                    window,
+                    -1,
+                    SDL_RENDERER_PRESENTVSYNC | 
+                    SDL_RENDERER_ACCELERATED
+                );
 
     texture = SDL_CreateTexture(
-                renderer,
-                SDL_PIXELFORMAT_RGBA8888,
-                SDL_TEXTUREACCESS_STATIC,
-                WINDOW_WIDTH,
-                WINDOW_HEIGHT
-            );
+                    renderer,
+                    SDL_PIXELFORMAT_RGBA8888,
+                    SDL_TEXTUREACCESS_STATIC,
+                    WINDOW_WIDTH,
+                    WINDOW_HEIGHT
+                );
 
     rect.w = 20;
     rect.h = 100;
@@ -56,37 +71,76 @@ int main(int argc, char *argv[]) {
 
 
     SDL_Event e;
+
     while (1) {
         Uint64 start = SDL_GetPerformanceCounter();
-        SDL_PollEvent(&e);
 
-        if (e.type == SDL_QUIT) {
-            SDL_Log("Program quit after %i ticks", e.quit.timestamp);
-            SDL_DestroyRenderer(renderer);
-            SDL_DestroyWindow(window);
-            SDL_Quit();
-            return 0;
-        }
+        while(SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                SDL_Log("Program quit after %i ticks", e.quit.timestamp);
+                SDL_DestroyRenderer(renderer);
+                SDL_DestroyWindow(window);
+                SDL_Quit();
+                return 0;
+            }
 
-        if (e.type == SDL_KEYDOWN) {
             SDL_Scancode key = e.key.keysym.scancode;
 
-            if (key == SDL_SCANCODE_K && rect.y > GAP) {
-                rect.y -= 20;
+            if (e.type == SDL_KEYDOWN) {
+
+                if (key == SDL_SCANCODE_K) {
+                    kb.k_pressed = true;
+                }
+
+                else if (key == SDL_SCANCODE_J) {
+                    kb.j_pressed = true;
+                }
+
+                else if (key == SDL_SCANCODE_L) {
+                    kb.l_pressed = true;
+                }
+
+                else if (key == SDL_SCANCODE_H) {
+                    kb.h_pressed = true;
+                }
             }
 
-            else if (key == SDL_SCANCODE_J && rect.y + rect.h + GAP < WINDOW_HEIGHT) {
-                rect.y += 20;
+            if (e.type == SDL_KEYUP) {
+
+                if (key == SDL_SCANCODE_K) {
+                    kb.k_pressed = false;
+                }
+
+                else if (key == SDL_SCANCODE_J) {
+                    kb.j_pressed = false;
+                }
+
+                else if (key == SDL_SCANCODE_L) {
+                    kb.l_pressed = false;
+                }
+
+                else if (key == SDL_SCANCODE_H) {
+                    kb.h_pressed = false;
+                }
             }
 
-            else if (key == SDL_SCANCODE_L && rect.x + rect.w + GAP < WINDOW_WIDTH) {
-                rect.x += 20;
+            if (kb.k_pressed && rect.y > GAP) {
+                    rect.y -= 10;
             }
 
-            else if (key == SDL_SCANCODE_H && rect.x > GAP) {
-                rect.x -= 20;
+            else if (kb.j_pressed && rect.y + rect.h + GAP < WINDOW_HEIGHT) {
+                    rect.y += 10;
+            }
+
+            else if (kb.l_pressed && rect.x + rect.w + GAP < WINDOW_WIDTH) {
+                    rect.x += 10;
+            }
+
+            else if (kb.h_pressed && rect.x > GAP) {
+                    rect.x -= 10;
             }
         }
+
 
         SDL_SetRenderTarget(renderer, texture);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
