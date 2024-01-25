@@ -2,6 +2,8 @@
 #include <SDL2/SDL_events.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
@@ -12,10 +14,13 @@
 #define LINE_WIDTH 10
 #define LINE_HEIGHT 50
 
+#define GAP 15
+
 #define BALL_SIDE 25
 #define BALL_INIT_SPEED 15
 
-#define PADDLE_SPEED 25
+#define PADDLE_SPEED_HUMAN 25
+#define PADDLE_SPEED_COMPUTER 20
 
 struct {
     bool j_pressed;
@@ -49,8 +54,10 @@ void human_move();
 void detect_keys(SDL_Scancode scancode, bool pressed);
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
 
-int main(int argc, char *argv[]) {
+int main(void) {
     SDL_Event event;
+
+    srandom(time(NULL));
 
     if (init_window()) {
         return 1;
@@ -63,8 +70,8 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-
         human_move();
+        computer_move();
         move_ball();
         render_frame();
     }
@@ -208,6 +215,12 @@ void move_ball() {
     if (is_colliding(display.ball, display.player_paddle) ||
         is_colliding(display.ball, display.computer_paddle)) {
         ball_stat.speed_x *= -1;
+        ball_stat.speed_y += random() % 10;
+    }
+
+    else if (display.ball.y <= 0 ||
+             display.ball.y + display.ball.h >= WINDOW_HEIGHT) {
+        ball_stat.speed_y *= -1;
     }
 
     display.ball.x += ball_stat.speed_x;
@@ -215,19 +228,31 @@ void move_ball() {
 }
 
 void computer_move() {
+    int ball_y = display.ball.y;
+    int comp_y = display.computer_paddle.y;
 
+    if (display.ball.x < WINDOW_WIDTH / 2) {
+        if (ball_y + PADDLE_HEIGHT / 4 > comp_y &&
+            ball_y - PADDLE_HEIGHT / 4 > comp_y &&
+            ball_y + PADDLE_HEIGHT + GAP < WINDOW_HEIGHT) {
+            display.computer_paddle.y += PADDLE_SPEED_COMPUTER / 1.5;
+        }
+
+        else if (ball_y + PADDLE_HEIGHT / 4 < comp_y &&
+                 ball_y - PADDLE_HEIGHT / 4 < comp_y && ball_y > GAP) {
+            display.computer_paddle.y -= PADDLE_SPEED_COMPUTER / 1.5;
+        }
+    }
 }
 
 void human_move() {
     if ((key_status.k_pressed || key_status.up_pressed) &&
-        display.player_paddle.y > 0) {
-        display.player_paddle.y -= PADDLE_SPEED;
-        display.computer_paddle.y -= PADDLE_SPEED;
+        display.player_paddle.y > GAP) {
+        display.player_paddle.y -= PADDLE_SPEED_HUMAN;
     }
 
     else if ((key_status.j_pressed || key_status.down_pressed) &&
-             display.player_paddle.y + PADDLE_HEIGHT < WINDOW_HEIGHT) {
-        display.player_paddle.y += PADDLE_SPEED;
-        display.computer_paddle.y += PADDLE_SPEED;
+             display.player_paddle.y + PADDLE_HEIGHT + GAP < WINDOW_HEIGHT) {
+        display.player_paddle.y += PADDLE_SPEED_HUMAN;
     }
 }
