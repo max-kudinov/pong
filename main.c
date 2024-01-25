@@ -14,7 +14,7 @@
 
 #define RECT_SPEED 25
 
-typedef struct {
+struct {
     bool j_pressed;
     bool k_pressed;
     bool up_pressed;
@@ -28,8 +28,7 @@ struct {
     SDL_Rect player_paddle;
     SDL_Rect computer_paddle;
     SDL_Rect line;
-    key_status keys;
-} state;
+} display;
 
 void detect_keys(SDL_Scancode scancode, bool pressed);
 int handle_input(SDL_Event *event);
@@ -42,7 +41,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    state.window = SDL_CreateWindow(
+    display.window = SDL_CreateWindow(
         "Game of Pong",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
@@ -52,39 +51,39 @@ int main(int argc, char *argv[]) {
         SDL_WINDOW_ALLOW_HIGHDPI
     );
 
-    if (state.window == NULL) {
+    if (display.window == NULL) {
         printf("Could not create window: %s\n", SDL_GetError());
         return 1;
     }
 
-    state.renderer = SDL_CreateRenderer(
-                    state.window,
+    display.renderer = SDL_CreateRenderer(
+                    display.window,
                     -1,
                     SDL_RENDERER_PRESENTVSYNC | 
                     SDL_RENDERER_ACCELERATED
                 );
 
-    state.texture = SDL_CreateTexture(
-                    state.renderer,
+    display.texture = SDL_CreateTexture(
+                    display.renderer,
                     SDL_PIXELFORMAT_RGBA8888,
                     SDL_TEXTUREACCESS_STATIC,
                     WINDOW_WIDTH,
                     WINDOW_HEIGHT
                 );
 
-    state.player_paddle.w = RECT_WIDTH;
-    state.player_paddle.h = RECT_HEIGHT;
-    state.player_paddle.x = WINDOW_WIDTH - 70;
-    state.player_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+    display.player_paddle.w = RECT_WIDTH;
+    display.player_paddle.h = RECT_HEIGHT;
+    display.player_paddle.x = WINDOW_WIDTH - 70;
+    display.player_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
 
-    state.computer_paddle.w = RECT_WIDTH;
-    state.computer_paddle.h = RECT_HEIGHT;
-    state.computer_paddle.x = 70 - RECT_WIDTH;
-    state.computer_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
+    display.computer_paddle.w = RECT_WIDTH;
+    display.computer_paddle.h = RECT_HEIGHT;
+    display.computer_paddle.x = 70 - RECT_WIDTH;
+    display.computer_paddle.y = WINDOW_HEIGHT / 2 - RECT_HEIGHT / 2;
 
-    state.line.w = LINE_WIDTH;
-    state.line.h = LINE_HEIGHT;
-    state.line.x = WINDOW_WIDTH / 2 - LINE_WIDTH / 2;
+    display.line.w = LINE_WIDTH;
+    display.line.h = LINE_HEIGHT;
+    display.line.x = WINDOW_WIDTH / 2 - LINE_WIDTH / 2;
 
     SDL_Event event;
 
@@ -94,15 +93,15 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        if ((state.keys.k_pressed || state.keys.up_pressed) && state.player_paddle.y > 0) {
-            state.player_paddle.y -= RECT_SPEED;
-            state.computer_paddle.y -= RECT_SPEED;
+        if ((key_status.k_pressed || key_status.up_pressed) && display.player_paddle.y > 0) {
+            display.player_paddle.y -= RECT_SPEED;
+            display.computer_paddle.y -= RECT_SPEED;
         }
 
-        else if ((state.keys.j_pressed || state.keys.down_pressed) &&
-                  state.player_paddle.y + RECT_HEIGHT < WINDOW_HEIGHT) {
-            state.player_paddle.y += RECT_SPEED;
-            state.computer_paddle.y += RECT_SPEED;
+        else if ((key_status.j_pressed || key_status.down_pressed) &&
+                  display.player_paddle.y + RECT_HEIGHT < WINDOW_HEIGHT) {
+            display.player_paddle.y += RECT_SPEED;
+            display.computer_paddle.y += RECT_SPEED;
         }
 
         render_frame();
@@ -112,19 +111,19 @@ int main(int argc, char *argv[]) {
 void detect_keys(SDL_Scancode scancode, bool pressed) {
     switch (scancode) {
         case SDL_SCANCODE_UP:
-            state.keys.up_pressed = pressed;
+            key_status.up_pressed = pressed;
             break;
 
         case SDL_SCANCODE_DOWN:
-            state.keys.down_pressed = pressed;
+            key_status.down_pressed = pressed;
             break;
 
         case SDL_SCANCODE_J:
-            state.keys.j_pressed = pressed;
+            key_status.j_pressed = pressed;
             break;
 
         case SDL_SCANCODE_K:
-            state.keys.k_pressed = pressed;
+            key_status.k_pressed = pressed;
             break;
 
         default:
@@ -141,8 +140,8 @@ int handle_input(SDL_Event *event) {
         switch(event->type) {
             case SDL_QUIT:
                 SDL_Log("Program quit after %i ticks", event->quit.timestamp);
-                SDL_DestroyRenderer(state.renderer);
-                SDL_DestroyWindow(state.window);
+                SDL_DestroyRenderer(display.renderer);
+                SDL_DestroyWindow(display.window);
                 SDL_Quit();
                 return 1;
 
@@ -160,20 +159,20 @@ int handle_input(SDL_Event *event) {
 
 void render_frame() {
     // Render background
-    SDL_SetRenderTarget(state.renderer, state.texture);
-    SDL_SetRenderDrawColor(state.renderer, 0, 0, 0, 0);
-    SDL_RenderClear(state.renderer);
+    SDL_SetRenderTarget(display.renderer, display.texture);
+    SDL_SetRenderDrawColor(display.renderer, 0, 0, 0, 0);
+    SDL_RenderClear(display.renderer);
 
     // Render paddles
-    SDL_SetRenderDrawColor(state.renderer, 255, 255, 255, 0);
-    SDL_RenderFillRect(state.renderer, &state.player_paddle);
-    SDL_RenderFillRect(state.renderer, &state.computer_paddle);
+    SDL_SetRenderDrawColor(display.renderer, 255, 255, 255, 0);
+    SDL_RenderFillRect(display.renderer, &display.player_paddle);
+    SDL_RenderFillRect(display.renderer, &display.computer_paddle);
 
     // Render center line
     for (int i = 0; i < WINDOW_HEIGHT; i += LINE_HEIGHT * 1.5) {
-        state.line.y = i;
-        SDL_RenderFillRect(state.renderer, &state.line);
+        display.line.y = i;
+        SDL_RenderFillRect(display.renderer, &display.line);
     }
 
-    SDL_RenderPresent(state.renderer);
+    SDL_RenderPresent(display.renderer);
 }
