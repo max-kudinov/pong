@@ -16,7 +16,7 @@
 #define LINE_HEIGHT 40
 
 #define SCORE_FONT_SIZE 72
-#define SCORE_TO_WIN 10
+#define SCORE_TO_WIN 1
 
 #define GAP 15
 
@@ -27,6 +27,7 @@
 #define PADDLE_SPEED_COMPUTER 25
 
 #define START_TEXT "Press any key to start"
+#define END_TEXT "Game over. (R - reset)"
 
 struct {
     SDL_Event event;
@@ -44,8 +45,8 @@ struct {
 } ball_stat;
 
 struct {
-    int human_value;
-    int computer_value;
+    int human;
+    int computer;
     SDL_Surface *surface_human;
     SDL_Surface *surface_computer;
     SDL_Texture *texture_human;
@@ -94,8 +95,6 @@ bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
 void create_text(char *message);
 
 int main(void) {
-    srandom(time(NULL));
-
     init_window();
     setup();
     create_text(START_TEXT);
@@ -105,6 +104,8 @@ int main(void) {
         handle_input();
     }
 
+    create_text(END_TEXT);
+
     while (true) {
         if (!game_state.human_won && !game_state.computer_won) {
             handle_input();
@@ -113,8 +114,8 @@ int main(void) {
             move_ball();
             check_goal();
             render_game_frame();
-        }
-        else {
+        } else {
+            handle_input();
             render_game_frame();
         }
     }
@@ -200,6 +201,11 @@ void render_game_frame() {
     SDL_RenderCopy(display.renderer, score.texture_computer, NULL,
                    &score.rect_computer);
 
+    if (game_state.human_won || game_state.computer_won) {
+        SDL_RenderCopy(display.renderer, text_message.message_texture, NULL,
+                       &text_message.message_rect);
+    }
+
     SDL_RenderPresent(display.renderer);
 }
 
@@ -259,12 +265,14 @@ void init_window() {
 }
 
 void setup() {
+    srandom(time(NULL));
+
     game_state.started = false;
     game_state.human_won = false;
     game_state.human_won = false;
 
-    score.human_value = 0;
-    score.computer_value = 0;
+    score.human = 0;
+    score.computer = 0;
 
     display.player_paddle.w = PADDLE_WIDTH;
     display.player_paddle.h = PADDLE_HEIGHT;
@@ -355,15 +363,23 @@ void human_move() {
 
 void check_goal() {
     if (display.ball.x <= 0) {
-        score.human_value++;
+        score.human++;
+        if (score.human == SCORE_TO_WIN) {
+            game_state.human_won = true;
+        } else {
+            reset_ball();
+        }
         update_score();
-        reset_ball();
     }
 
     else if (display.ball.x + BALL_SIDE >= WINDOW_WIDTH) {
-        score.computer_value++;
+        score.computer++;
+        if (score.computer == SCORE_TO_WIN) {
+            game_state.computer_won = true;
+        } else {
+            reset_ball();
+        }
         update_score();
-        reset_ball();
     }
 }
 
@@ -389,6 +405,7 @@ void close_display() {
     SDL_FreeSurface(score.surface_human);
     SDL_DestroyTexture(score.texture_computer);
     SDL_FreeSurface(score.surface_computer);
+    SDL_DestroyTexture(text_message.message_texture);
     TTF_Quit();
     SDL_Quit();
 }
@@ -402,14 +419,14 @@ void update_score() {
     SDL_FreeSurface(score.surface_human);
     SDL_FreeSurface(score.surface_computer);
 
-    sprintf(score_str, "%d", score.human_value);
+    sprintf(score_str, "%d", score.human);
 
     score.surface_human =
         TTF_RenderText_Solid(display.font, score_str, display.color);
     score.texture_human =
         SDL_CreateTextureFromSurface(display.renderer, score.surface_human);
 
-    sprintf(score_str, "%d", score.computer_value);
+    sprintf(score_str, "%d", score.computer);
 
     score.surface_computer =
         TTF_RenderText_Solid(display.font, score_str, display.color);
