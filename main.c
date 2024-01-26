@@ -15,7 +15,7 @@
 #define LINE_WIDTH 10
 #define LINE_HEIGHT 40
 
-#define SCORE_FONT_SIZE 80
+#define SCORE_FONT_SIZE 72
 #define SCORE_TO_WIN 10
 
 #define GAP 15
@@ -25,6 +25,8 @@
 
 #define PADDLE_SPEED_HUMAN 25
 #define PADDLE_SPEED_COMPUTER 25
+
+#define START_TEXT "Press any key to start"
 
 struct {
     SDL_Event event;
@@ -53,6 +55,17 @@ struct {
 } score;
 
 struct {
+    bool started;
+    bool human_won;
+    bool computer_won;
+} game_state;
+
+struct {
+    SDL_Rect message_rect;
+    SDL_Texture *message_texture;
+} text_message;
+
+struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
@@ -61,12 +74,13 @@ struct {
     SDL_Rect computer_paddle;
     SDL_Rect line;
     SDL_Rect ball;
+    SDL_Color color;
 } display;
 
 void init_window();
 void close_display();
-void object_setup();
-void render_frame();
+void setup();
+void render_game_frame();
 void handle_input();
 void move_ball();
 void computer_move();
@@ -74,22 +88,35 @@ void human_move();
 void check_goal();
 void update_score();
 void reset_ball();
+void render_start_frame();
 void detect_keys(SDL_Scancode scancode, bool pressed);
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
+void create_text(char *message);
 
 int main(void) {
     srandom(time(NULL));
 
     init_window();
-    object_setup();
+    setup();
+    create_text(START_TEXT);
+
+    while (!game_state.started) {
+        render_start_frame();
+        handle_input();
+    }
 
     while (true) {
-        handle_input();
-        human_move();
-        computer_move();
-        move_ball();
-        check_goal();
-        render_frame();
+        if (!game_state.human_won && !game_state.computer_won) {
+            handle_input();
+            human_move();
+            computer_move();
+            move_ball();
+            check_goal();
+            render_game_frame();
+        }
+        else {
+            render_game_frame();
+        }
     }
 }
 
@@ -111,6 +138,10 @@ void detect_keys(SDL_Scancode scancode, bool pressed) {
         input_status.k_pressed = pressed;
         break;
 
+    case SDL_SCANCODE_Q:
+        close_display();
+        exit(0);
+
     default:
         break;
     }
@@ -126,10 +157,14 @@ void handle_input() {
         switch (event.type) {
         case SDL_QUIT:
             close_display();
-            exit(1);
+            exit(0);
 
         case SDL_KEYDOWN:
             detect_keys(scancode, true);
+            if (!game_state.started) {
+                game_state.started = true;
+                SDL_DestroyTexture(text_message.message_texture);
+            }
             break;
 
         case SDL_KEYUP:
@@ -139,7 +174,7 @@ void handle_input() {
     }
 }
 
-void render_frame() {
+void render_game_frame() {
     // Render background
     SDL_SetRenderTarget(display.renderer, display.texture);
     SDL_SetRenderDrawColor(display.renderer, 0, 0, 0, 0);
@@ -215,12 +250,22 @@ void init_window() {
         exit(1);
     }
 
+    SDL_Color white = {255, 255, 255};
+    display.color = white;
+
     update_score();
     SDL_GetClipRect(score.surface_human, &score.rect_human);
     SDL_GetClipRect(score.surface_computer, &score.rect_computer);
 }
 
-void object_setup() {
+void setup() {
+    game_state.started = false;
+    game_state.human_won = false;
+    game_state.human_won = false;
+
+    score.human_value = 0;
+    score.computer_value = 0;
+
     display.player_paddle.w = PADDLE_WIDTH;
     display.player_paddle.h = PADDLE_HEIGHT;
     display.player_paddle.x = WINDOW_WIDTH - 70;
@@ -349,7 +394,6 @@ void close_display() {
 }
 
 void update_score() {
-    SDL_Color white = {255, 255, 255};
     char score_str[2];
 
     SDL_DestroyTexture(score.texture_human);
@@ -360,14 +404,41 @@ void update_score() {
 
     sprintf(score_str, "%d", score.human_value);
 
-    score.surface_human = TTF_RenderText_Solid(display.font, score_str, white);
+    score.surface_human =
+        TTF_RenderText_Solid(display.font, score_str, display.color);
     score.texture_human =
         SDL_CreateTextureFromSurface(display.renderer, score.surface_human);
 
     sprintf(score_str, "%d", score.computer_value);
 
     score.surface_computer =
-        TTF_RenderText_Solid(display.font, score_str, white);
+        TTF_RenderText_Solid(display.font, score_str, display.color);
     score.texture_computer =
         SDL_CreateTextureFromSurface(display.renderer, score.surface_computer);
+}
+
+void render_start_frame() {
+    // Render background
+    SDL_SetRenderDrawColor(display.renderer, 0, 0, 0, 0);
+    SDL_RenderClear(display.renderer);
+
+    SDL_RenderCopy(display.renderer, text_message.message_texture, NULL,
+                   &text_message.message_rect);
+
+    SDL_RenderPresent(display.renderer);
+}
+
+void create_text(char *message) {
+    SDL_Surface *message_surface =
+        TTF_RenderText_Solid(display.font, message, display.color);
+
+    text_message.message_texture =
+        SDL_CreateTextureFromSurface(display.renderer, message_surface);
+
+    SDL_GetClipRect(message_surface, &text_message.message_rect);
+
+    text_message.message_rect.x = WINDOW_WIDTH / 5;
+    text_message.message_rect.y = WINDOW_HEIGHT / 3;
+
+    SDL_FreeSurface(message_surface);
 }
