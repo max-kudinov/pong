@@ -12,7 +12,7 @@
 #define PADDLE_HEIGHT 100
 
 #define LINE_WIDTH 10
-#define LINE_HEIGHT 50
+#define LINE_HEIGHT 40
 
 #define GAP 15
 
@@ -150,7 +150,7 @@ void render_frame() {
     SDL_RenderFillRect(display.renderer, &display.ball);
 
     // Render center line
-    for (int i = 0; i < WINDOW_HEIGHT; i += LINE_HEIGHT * 1.5) {
+    for (int i = 0; i < WINDOW_HEIGHT; i += LINE_HEIGHT * 2) {
         display.line.y = i;
         SDL_RenderFillRect(display.renderer, &display.line);
     }
