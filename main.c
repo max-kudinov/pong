@@ -17,10 +17,10 @@
 #define GAP 15
 
 #define BALL_SIDE 25
-#define BALL_INIT_SPEED 15
+#define BALL_SPEED 15
 
 #define PADDLE_SPEED_HUMAN 25
-#define PADDLE_SPEED_COMPUTER 20
+#define PADDLE_SPEED_COMPUTER 25
 
 struct {
     bool j_pressed;
@@ -32,7 +32,14 @@ struct {
 struct {
     int speed_x;
     int speed_y;
+    int start_direction;
+    bool first_reflect;
 } ball_stat;
+
+struct {
+    int human;
+    int computer;
+} score;
 
 struct {
     SDL_Window *window;
@@ -51,6 +58,8 @@ int handle_input(SDL_Event *event);
 void move_ball();
 void computer_move();
 void human_move();
+void check_goal();
+void reset_ball();
 void detect_keys(SDL_Scancode scancode, bool pressed);
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
 
@@ -58,12 +67,11 @@ int main(void) {
     SDL_Event event;
 
     srandom(time(NULL));
+    objects_setup();
 
     if (init_window()) {
         return 1;
     }
-
-    objects_setup();
 
     while (1) {
         if (handle_input(&event)) {
@@ -73,6 +81,7 @@ int main(void) {
         human_move();
         computer_move();
         move_ball();
+        check_goal();
         render_frame();
     }
 }
@@ -197,11 +206,9 @@ void objects_setup() {
     display.ball.w = BALL_SIDE;
     display.ball.h = BALL_SIDE;
 
-    display.ball.x = WINDOW_WIDTH / 2 - BALL_SIDE / 2;
-    display.ball.y = WINDOW_HEIGHT / 2;
+    ball_stat.start_direction = -1;
 
-    ball_stat.speed_x = BALL_INIT_SPEED;
-    ball_stat.speed_y = 0;
+    reset_ball();
 }
 
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball) {
@@ -214,7 +221,13 @@ bool is_colliding(SDL_Rect paddle, SDL_Rect ball) {
 void move_ball() {
     if (is_colliding(display.ball, display.player_paddle) ||
         is_colliding(display.ball, display.computer_paddle)) {
-        ball_stat.speed_x *= -1;
+
+        if (ball_stat.first_reflect) {
+            ball_stat.speed_x = BALL_SPEED * ball_stat.start_direction;
+            ball_stat.first_reflect = false;
+        }
+
+        ball_stat.speed_x *= -1.05;
         ball_stat.speed_y += random() % 10;
     }
 
@@ -255,4 +268,23 @@ void human_move() {
              display.player_paddle.y + PADDLE_HEIGHT + GAP < WINDOW_HEIGHT) {
         display.player_paddle.y += PADDLE_SPEED_HUMAN;
     }
+}
+
+void check_goal() {
+    if (display.ball.x <= 0 || display.ball.x + BALL_SIDE >= WINDOW_WIDTH) {
+        reset_ball();
+    }
+}
+
+void reset_ball() {
+    display.ball.x = WINDOW_WIDTH / 2 - BALL_SIDE / 2;
+    display.ball.y = WINDOW_HEIGHT / 2;
+
+    ball_stat.start_direction *= -1;
+    ball_stat.first_reflect = true;
+
+    ball_stat.speed_x = BALL_SPEED / 1.5 * ball_stat.start_direction;
+
+    int sign = random() % 2 == 0 ? -1 : 1;
+    ball_stat.speed_y = random() % 5 * sign;
 }
