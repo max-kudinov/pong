@@ -15,6 +15,9 @@
 #define LINE_WIDTH 10
 #define LINE_HEIGHT 40
 
+#define SCORE_FONT_SIZE 80
+#define SCORE_TO_WIN 10
+
 #define GAP 15
 
 #define BALL_SIDE 25
@@ -39,8 +42,14 @@ struct {
 } ball_stat;
 
 struct {
-    int human;
-    int computer;
+    int human_value;
+    int computer_value;
+    SDL_Surface *surface_human;
+    SDL_Surface *surface_computer;
+    SDL_Texture *texture_human;
+    SDL_Texture *texture_computer;
+    SDL_Rect rect_human;
+    SDL_Rect rect_computer;
 } score;
 
 struct {
@@ -52,9 +61,6 @@ struct {
     SDL_Rect computer_paddle;
     SDL_Rect line;
     SDL_Rect ball;
-    SDL_Surface *text_surface;
-    SDL_Texture *text_texture;
-    SDL_Rect text_rect;
 } display;
 
 void init_window();
@@ -66,6 +72,7 @@ void move_ball();
 void computer_move();
 void human_move();
 void check_goal();
+void update_score();
 void reset_ball();
 void detect_keys(SDL_Scancode scancode, bool pressed);
 bool is_colliding(SDL_Rect paddle, SDL_Rect ball);
@@ -152,7 +159,12 @@ void render_frame() {
         SDL_RenderFillRect(display.renderer, &display.line);
     }
 
-    SDL_RenderCopy(display.renderer, display.text_texture, NULL, &display.text_rect);
+    SDL_RenderCopy(display.renderer, score.texture_human, NULL,
+                   &score.rect_human);
+
+    SDL_RenderCopy(display.renderer, score.texture_computer, NULL,
+                   &score.rect_computer);
+
     SDL_RenderPresent(display.renderer);
 }
 
@@ -194,20 +206,18 @@ void init_window() {
         WINDOW_WIDTH, WINDOW_HEIGHT);
 
     // Init for text
-    SDL_Color white = {255, 255, 255};
-    display.font = TTF_OpenFont("forward.ttf", 100);
+    display.font = TTF_OpenFont("forward.ttf", SCORE_FONT_SIZE);
 
     if (display.font == NULL) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
-                     "Couldn't load the font: %s", TTF_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't load the font: %s",
+                     TTF_GetError());
         close_display();
         exit(1);
     }
 
-    display.text_surface = TTF_RenderText_Solid(display.font, "0", white);
-    display.text_texture =
-        SDL_CreateTextureFromSurface(display.renderer, display.text_surface);
-    SDL_GetClipRect(display.text_surface, &display.text_rect);
+    update_score();
+    SDL_GetClipRect(score.surface_human, &score.rect_human);
+    SDL_GetClipRect(score.surface_computer, &score.rect_computer);
 }
 
 void object_setup() {
@@ -225,8 +235,11 @@ void object_setup() {
     display.line.h = LINE_HEIGHT;
     display.line.x = WINDOW_WIDTH / 2 - LINE_WIDTH / 2;
 
-    display.text_rect.x = WINDOW_WIDTH - WINDOW_WIDTH / 5;
-    display.text_rect.y = WINDOW_HEIGHT / 20;
+    score.rect_human.x = WINDOW_WIDTH - WINDOW_WIDTH / 5;
+    score.rect_human.y = WINDOW_HEIGHT / 20;
+
+    score.rect_computer.x = WINDOW_WIDTH / 5;
+    score.rect_computer.y = WINDOW_HEIGHT / 20;
 
     display.ball.w = BALL_SIDE;
     display.ball.h = BALL_SIDE;
@@ -297,12 +310,14 @@ void human_move() {
 
 void check_goal() {
     if (display.ball.x <= 0) {
-        score.human++;
+        score.human_value++;
+        update_score();
         reset_ball();
     }
 
     else if (display.ball.x + BALL_SIDE >= WINDOW_WIDTH) {
-        score.computer++;
+        score.computer_value++;
+        update_score();
         reset_ball();
     }
 }
@@ -323,10 +338,36 @@ void reset_ball() {
 void close_display() {
     TTF_CloseFont(display.font);
     SDL_DestroyTexture(display.texture);
-    SDL_DestroyTexture(display.text_texture);
-    SDL_FreeSurface(display.text_surface);
     SDL_DestroyRenderer(display.renderer);
     SDL_DestroyWindow(display.window);
+    SDL_DestroyTexture(score.texture_human);
+    SDL_FreeSurface(score.surface_human);
+    SDL_DestroyTexture(score.texture_computer);
+    SDL_FreeSurface(score.surface_computer);
     TTF_Quit();
     SDL_Quit();
+}
+
+void update_score() {
+    SDL_Color white = {255, 255, 255};
+    char score_str[2];
+
+    SDL_DestroyTexture(score.texture_human);
+    SDL_DestroyTexture(score.texture_computer);
+
+    SDL_FreeSurface(score.surface_human);
+    SDL_FreeSurface(score.surface_computer);
+
+    sprintf(score_str, "%d", score.human_value);
+
+    score.surface_human = TTF_RenderText_Solid(display.font, score_str, white);
+    score.texture_human =
+        SDL_CreateTextureFromSurface(display.renderer, score.surface_human);
+
+    sprintf(score_str, "%d", score.computer_value);
+
+    score.surface_computer =
+        TTF_RenderText_Solid(display.font, score_str, white);
+    score.texture_computer =
+        SDL_CreateTextureFromSurface(display.renderer, score.surface_computer);
 }
