@@ -1,4 +1,4 @@
-main: main.o state.o logic.o render.o
+main: main.o state.o input.o logic.o render.o
 	@clang main.o state.o input.o logic.o render.o -o main -Wall -lSDL2 -lSDL2_ttf
 
 main.o: main.c
