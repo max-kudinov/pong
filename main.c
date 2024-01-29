@@ -43,28 +43,26 @@ int main(void) {
     // ball_t *ball;
 
     // Input
-    // key_status_t *key_status;
+    key_status_t key_status = {false};
 
     // Render
     // score_t *score;
     text_t text;
     window_t window;
     // objects_t *objects;
-    bg_color_t bg_c;
+    bg_color_t bg_c = {0, 0, 0, 0};
 
-    bg_c.r = 0;
-    bg_c.g = 0;
-    bg_c.b = 0;
-    bg_c.a = 0;
+    init_window(&window, &text, FONT_NAME, FONT_SIZE, WINDOW_HEIGHT,
+                WINDOW_WIDTH, WINDOW_TITLE);
 
-    init_window(&window, &text, FONT_NAME, FONT_SIZE, WINDOW_WIDTH, WINDOW_WIDTH,
-                WINDOW_TITLE);
+    create_text(&window, &text, START_TEXT, WINDOW_WIDTH / 5,
+                WINDOW_HEIGHT / 3);
 
-
-    // init_line(window, WINDOW_WIDTH / 2 - LINE_WIDTH / 2, LINE_HEIGHT,
-    //           LINE_WIDTH);
-
-    // render_start_screen(&window, &text, bg_c);
+    while(true) {
+        handle_input(&key_status);
+        check_actions(&window, &text, &key_status);
+        render_start_screen(&window, &text, bg_c);
+    }
 
     // init_window();
     // setup();

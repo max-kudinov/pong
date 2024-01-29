@@ -98,3 +98,42 @@ bool check_goal(game_t *game, ball_t *ball, int win_score, int window_w) {
 
     return goal;
 }
+
+void check_actions(window_t *window, text_t *text, key_status_t *key_status) {
+    if (key_status->quit) {
+        close_window(window, text);
+        exit(0);
+    }
+}
+
+void init_objects(objects_t *objects, paddle_t *human_p, paddle_t *computer_p,
+                  ball_t *ball) {
+
+    // Set dimensions for human paddle
+    objects->human_paddle.w = human_p->width;
+    objects->human_paddle.h = human_p->height;
+
+    // Set dimensions for computer paddle
+    objects->computer_paddle.w = computer_p->width;
+    objects->computer_paddle.h = computer_p->height;
+
+    // Set size for ball
+    objects->ball.w = ball->side;
+    objects->ball.h = ball->side;
+}
+
+void sync_coordinates(objects_t *objects, paddle_t *human_p,
+                      paddle_t *computer_p, ball_t *ball) {
+
+    // Sync human
+    objects->human_paddle.x = human_p->x;
+    objects->human_paddle.y = human_p->y;
+
+    // Sync computer
+    objects->computer_paddle.x = computer_p->x;
+    objects->computer_paddle.y = computer_p->y;
+
+    // Sync ball
+    objects->ball.x = ball->x;
+    objects->ball.y = ball->y;
+}

@@ -2,6 +2,7 @@
 #define LOGIC_H
 
 #include "input.h"
+#include "render.h"
 #include "state.h"
 
 // Update human paddle coordinates
@@ -22,4 +23,14 @@ bool is_colliding(paddle_t *paddle, ball_t *ball);
 // Returns true if there's a goal, otherwise false
 bool check_goal(game_t *game, ball_t *ball, int win_score, int window_w);
 
+// Init render objects with logic dimensions
+void init_objects(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
+                  ball_t *b);
+
+// Sync coordinates between game logic objects and render objects
+void sync_coordinates(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
+                      ball_t *b);
+
+// Check for keyboard actions
+void check_actions(window_t *window, text_t *text, key_status_t *key_status);
 #endif // !LOGIC_H

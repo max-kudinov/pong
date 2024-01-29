@@ -20,7 +20,4 @@ bool handle_input(key_status_t *key_status);
 // Set flags for pressed keys or actions
 void detect_keys(SDL_Scancode scancode, key_status_t *key_status, bool pressed);
 
-// Init all flags to false
-void init_flags(key_status_t *ks);
-
 #endif // !INPUT_H

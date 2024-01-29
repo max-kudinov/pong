@@ -191,35 +191,3 @@ void init_line(window_t *window, int line_x, int line_h, int line_w) {
     window->line.h = line_h;
     window->line.w = line_w;
 }
-
-void init_objects(objects_t *objects, paddle_t *human_p, paddle_t *computer_p,
-                  ball_t *ball) {
-
-    // Set dimensions for human paddle
-    objects->human_paddle.w = human_p->width;
-    objects->human_paddle.h = human_p->height;
-
-    // Set dimensions for computer paddle
-    objects->computer_paddle.w = computer_p->width;
-    objects->computer_paddle.h = computer_p->height;
-
-    // Set size for ball
-    objects->ball.w = ball->side;
-    objects->ball.h = ball->side;
-}
-
-void sync_coordinates(objects_t *objects, paddle_t *human_p,
-                      paddle_t *computer_p, ball_t *ball) {
-
-    // Sync human
-    objects->human_paddle.x = human_p->x;
-    objects->human_paddle.y = human_p->y;
-
-    // Sync computer
-    objects->computer_paddle.x = computer_p->x;
-    objects->computer_paddle.y = computer_p->y;
-
-    // Sync ball
-    objects->ball.x = ball->x;
-    objects->ball.y = ball->y;
-}

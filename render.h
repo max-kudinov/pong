@@ -1,9 +1,9 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include "logic.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <stdio.h>
 
 typedef struct {
     SDL_Surface *surface;
@@ -68,11 +68,4 @@ void render_score(window_t *window, text_t *text, score_t *s_human,
 // Init line parameters
 void init_line(window_t *window, int line_x, int line_h, int line_w);
 
-// Init render objects with logic dimensions
-void init_objects(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
-                  ball_t *b);
-
-// Sync coordinates between game logic objects and render objects
-void sync_coordinates(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
-                      ball_t *b);
 #endif // !RENDER_H
