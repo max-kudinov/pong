@@ -100,7 +100,7 @@ void init_score(window_t *window, text_t *text, score_t *score, int x, int y) {
 }
 
 void update_score(score_t *score, window_t *window, text_t *text, int value) {
-    char *score_str;
+    char *score_str = NULL;
 
     // Free memory from previous score
     SDL_DestroyTexture(score->texture);

@@ -57,13 +57,13 @@ int main(void) {
     bg_c.b = 0;
     bg_c.a = 0;
 
-    init_window(window, text, FONT_NAME, FONT_SIZE, WINDOW_WIDTH, WINDOW_WIDTH,
+    init_window(&window, &text, FONT_NAME, FONT_SIZE, WINDOW_WIDTH, WINDOW_WIDTH,
                 WINDOW_TITLE);
 
     // init_line(window, WINDOW_WIDTH / 2 - LINE_WIDTH / 2, LINE_HEIGHT,
     //           LINE_WIDTH);
 
-    render_start_screen(window, text, bg_c);
+    render_start_screen(&window, &text, bg_c);
 
     // init_window();
     // setup();
