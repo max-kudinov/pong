@@ -63,7 +63,7 @@ int main(void) {
     // init_line(window, WINDOW_WIDTH / 2 - LINE_WIDTH / 2, LINE_HEIGHT,
     //           LINE_WIDTH);
 
-    render_start_screen(&window, &text, bg_c);
+    // render_start_screen(&window, &text, bg_c);
 
     // init_window();
     // setup();
