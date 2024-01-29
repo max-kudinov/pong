@@ -60,6 +60,7 @@ int main(void) {
     init_window(&window, &text, FONT_NAME, FONT_SIZE, WINDOW_WIDTH, WINDOW_WIDTH,
                 WINDOW_TITLE);
 
+
     // init_line(window, WINDOW_WIDTH / 2 - LINE_WIDTH / 2, LINE_HEIGHT,
     //           LINE_WIDTH);
 

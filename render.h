@@ -2,6 +2,7 @@
 #define RENDER_H
 
 #include "logic.h"
+#include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
 typedef struct {

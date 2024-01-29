@@ -4,13 +4,13 @@ main: main.o state.o logic.o render.o
 main.o: main.c
 	@clang -c main.c
 
-state.o: state.c
+state.o: state.c state.h
 	@clang -c state.c
 
-logic.o: logic.c
+logic.o: logic.c logic.h
 	@clang -c logic.c
 
-render.o: render.c
+render.o: render.c render.h
 	@clang -c render.c
 
 clean:
