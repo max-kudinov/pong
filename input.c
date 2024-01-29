@@ -48,11 +48,11 @@ void detect_keys(SDL_Scancode scancode, key_status_t *key_status,
         break;
 
     case SDL_SCANCODE_Q:
-        key_status->quit = true;
+        key_status->quit = pressed;
         break;
 
     case SDL_SCANCODE_R:
-        key_status->reload = true;
+        key_status->reload = pressed;
         break;
 
     default:

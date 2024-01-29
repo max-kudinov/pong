@@ -73,7 +73,7 @@ void close_window(window_t *window, text_t *text) {
 
     // Text
     TTF_CloseFont(text->font);
-    SDL_DestroyTexture(text->text_texutre);
+    SDL_DestroyTexture(text->text_texture);
 
     // Window
     SDL_DestroyTexture(window->texture);
@@ -100,7 +100,7 @@ void init_score(window_t *window, text_t *text, score_t *score, int x, int y) {
 }
 
 void update_score(score_t *score, window_t *window, text_t *text, int value) {
-    char *score_str = NULL;
+    char score_str[2];
 
     // Free memory from previous score
     SDL_DestroyTexture(score->texture);
@@ -118,13 +118,13 @@ void update_score(score_t *score, window_t *window, text_t *text, int value) {
 void create_text(window_t *window, text_t *text, char *message, int x, int y) {
 
     // Free previous text
-    SDL_DestroyTexture(text->text_texutre);
+    SDL_DestroyTexture(text->text_texture);
 
     // Create new text surface and texture
     SDL_Surface *text_surface =
         TTF_RenderText_Solid(text->font, message, text->color);
 
-    text->text_texutre =
+    text->text_texture =
         SDL_CreateTextureFromSurface(window->renderer, text_surface);
 
     // Clip text size
@@ -138,15 +138,14 @@ void create_text(window_t *window, text_t *text, char *message, int x, int y) {
     SDL_FreeSurface(text_surface);
 }
 
-void render_start_screen(window_t *window, text_t *text, bg_color_t bg_c) {
+void render_static_screen(window_t *window, text_t *text, bg_color_t bg_c) {
 
     // Render background
-    SDL_SetRenderDrawColor(window->renderer, bg_c.r, bg_c.g, bg_c.b,
-                           bg_c.a);
+    SDL_SetRenderDrawColor(window->renderer, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
     SDL_RenderClear(window->renderer);
 
     // Render text
-    SDL_RenderCopy(window->renderer, text->text_texutre, NULL,
+    SDL_RenderCopy(window->renderer, text->text_texture, NULL,
                    &text->text_rect);
 
     SDL_RenderPresent(window->renderer);
@@ -156,8 +155,7 @@ void render_game(window_t *window, objects_t *objects, bg_color_t bg_c,
                  int window_h) {
 
     // Render background
-    SDL_SetRenderDrawColor(window->renderer, bg_c.r, bg_c.g, bg_c.b,
-                           bg_c.a);
+    SDL_SetRenderDrawColor(window->renderer, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
     SDL_RenderClear(window->renderer);
 
     // Render paddles

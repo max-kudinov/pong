@@ -24,13 +24,13 @@ bool is_colliding(paddle_t *paddle, ball_t *ball);
 bool check_goal(game_t *game, ball_t *ball, int win_score, int window_w);
 
 // Init render objects with logic dimensions
-void init_objects(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
-                  ball_t *b);
+void init_objects(objects_t *objects, paddle_t *human_p, paddle_t *computer_p,
+                  ball_t *ball);
 
 // Sync coordinates between game logic objects and render objects
-void sync_coordinates(objects_t *o, paddle_t *human_p, paddle_t *computer_p,
-                      ball_t *b);
+void sync_coordinates(objects_t *objects, paddle_t *human_p, paddle_t *computer_p,
+                      ball_t *ball);
 
 // Check for keyboard actions
-void check_actions(window_t *window, text_t *text, key_status_t *key_status);
+void check_actions(game_t *game, window_t *window, text_t *text, key_status_t *key_status);
 #endif // !LOGIC_H

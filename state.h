@@ -37,10 +37,10 @@ typedef struct {
 void reset_state(game_t *g);
 
 // Set paddle parameters before the game
-void create_paddle(paddle_t *p, int width, int height, int x, int y);
+void init_paddle(paddle_t *p, int width, int height, int x, int y);
 
 // Create a ball before the game
-void create_ball(ball_t *b, int side);
+void init_ball(ball_t *b, int side);
 
 // Return to center and reset speed
 void reset_ball(ball_t *b, int side, int init_speed, int w_width, int w_height);

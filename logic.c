@@ -99,10 +99,13 @@ bool check_goal(game_t *game, ball_t *ball, int win_score, int window_w) {
     return goal;
 }
 
-void check_actions(window_t *window, text_t *text, key_status_t *key_status) {
+void check_actions(game_t *game, window_t *window, text_t *text, key_status_t *key_status) {
     if (key_status->quit) {
         close_window(window, text);
         exit(0);
+    }
+    else if (key_status->reload) {
+        reset_state(game);
     }
 }
 

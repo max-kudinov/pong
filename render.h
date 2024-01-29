@@ -15,7 +15,7 @@ typedef struct {
     TTF_Font *font;
     SDL_Color color;
     SDL_Rect text_rect;
-    SDL_Texture *text_texutre;
+    SDL_Texture *text_texture;
 } text_t;
 
 typedef struct {
@@ -55,7 +55,7 @@ void update_score(score_t *score, window_t *window, text_t *text, int value);
 void create_text(window_t *window, text_t *text, char *message, int x, int y);
 
 // Render screen before the game
-void render_start_screen(window_t *window, text_t *text, bg_color_t bg_c);
+void render_static_screen(window_t *window, text_t *text, bg_color_t bg_c);
 
 // Render main game
 void render_game(window_t *window, objects_t *objects, bg_color_t bg_c,

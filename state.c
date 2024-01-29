@@ -16,7 +16,7 @@ void init_paddle(paddle_t *paddle, int width, int height, int x, int y) {
     paddle->y = y;
 }
 
-void create_ball(ball_t *ball, int side) {
+void init_ball(ball_t *ball, int side) {
     ball->side = side;
     ball->start_direction = -1;
 }
